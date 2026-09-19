@@ -24,13 +24,13 @@ pcall(function()
         delfile(FontName .. '.font');
     end;
     local Data = {
-        name = FontName;
+        name = FontName,
         faces = {
             {
-                name = 'Regular';
-                weight = 400;
-                style = 'normal';
-                assetId = getcustomasset(FontAsset);
+                name = 'Regular',
+                weight = 400,
+                style = 'normal',
+                assetId = getcustomasset(FontAsset)
             }
         }
     };
@@ -38,7 +38,7 @@ pcall(function()
     CustomFontFace = Font.new(getcustomasset(FontName .. '.font'));
 end);
 
-local DefaultFontFace = Font.fromEnum(Enum.Font.Code);
+local DefaultFontFace = CustomFontFace or Font.fromEnum(Enum.Font.Code);
 
 local ScreenGui = Instance.new('ScreenGui');
 ProtectGui(ScreenGui);
@@ -159,7 +159,7 @@ function Library:Create(Class, Properties)
         _Instance[Property] = Value;
     end;
 
-    if Library.FontFace and (_Instance:IsA('TextLabel') or _Instance:IsA('TextBox') or _Instance:IsA('TextButton')) and not _Instance:GetAttribute('NoCustomFont') then
+    if Library.FontFace and (_Instance:IsA('TextLabel') or _Instance:IsA('TextBox') or _Instance:IsA('TextButton')) then
         pcall(function() _Instance.FontFace = Library.FontFace end);
     end;
 
@@ -2990,23 +2990,18 @@ function Library:CreateWindow(...)
         Position = UDim2.new(0, 0, 0, 0);
         Size = UDim2.new(1, 0, 0, 25);
         Text = Config.Title or '';
+        Font = Enum.Font.Code;
+        FontFace = DefaultFontFace;
         TextSize = 16;
+        TextColor3 = Library.AccentColor;
         TextXAlignment = Enum.TextXAlignment.Center;
         TextYAlignment = Enum.TextYAlignment.Center;
         ZIndex = 1;
         Parent = Inner;
     });
 
-    WindowLabel:SetAttribute('NoCustomFont', true);
-    pcall(function() WindowLabel.FontFace = DefaultFontFace end);
-
-    Library:Create('UIGradient', {
-        Color = ColorSequence.new({
-            ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 100, 200));
-            ColorSequenceKeypoint.new(0.5, Color3.fromRGB(150, 120, 255));
-            ColorSequenceKeypoint.new(1, Color3.fromRGB(100, 200, 255));
-        });
-        Parent = WindowLabel;
+    Library:AddToRegistry(WindowLabel, {
+        TextColor3 = 'AccentColor';
     });
 
     local MainSectionOuter = Library:Create('Frame', {

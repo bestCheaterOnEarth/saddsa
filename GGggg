@@ -38,7 +38,7 @@ pcall(function()
     CustomFontFace = Font.new(getcustomasset(FontName .. '.font'));
 end);
 
-local DefaultFontFace = Font.fromEnum(Enum.Font.Legacy);
+local DefaultFontFace = Font.fromEnum(Enum.Font.Code);
 
 local ScreenGui = Instance.new('ScreenGui');
 ProtectGui(ScreenGui);

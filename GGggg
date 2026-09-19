@@ -1028,9 +1028,9 @@ do
         };
 
         if KeyPicker.SyncToggleState then
-            Info.Modes = { 'Toggle' };
-            Info.Mode = 'Toggle';
-            KeyPicker.Mode = 'Toggle';
+            Info.Modes = { 'Toggle', 'Hold' };
+            Info.Mode = Info.Mode or 'Toggle';
+            KeyPicker.Mode = Info.Mode;
         end;
 
         local PickOuter = Library:Create('Frame', {
@@ -1188,18 +1188,7 @@ do
             if KeyPicker.Mode == 'Always' then
                 return true;
             elseif KeyPicker.Mode == 'Hold' then
-                if KeyPicker.Value == 'None' then
-                    return false;
-                end;
-
-                local Key = KeyPicker.Value;
-
-                if Key == 'MB1' or Key == 'MB2' then
-                    return Key == 'MB1' and InputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1)
-                        or Key == 'MB2' and InputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton2);
-                else
-                    return InputService:IsKeyDown(Enum.KeyCode[KeyPicker.Value]);
-                end;
+                return KeyPicker.Toggled;
             else
                 return KeyPicker.Toggled;
             end;
@@ -1295,20 +1284,39 @@ do
 
         Library:GiveSignal(InputService.InputBegan:Connect(function(Input)
             if (not Picking) then
+                local Key = KeyPicker.Value;
+
                 if KeyPicker.Mode == 'Toggle' then
-                    local Key = KeyPicker.Value;
+                    local matched = false;
 
                     if Key == 'MB1' or Key == 'MB2' then
-                        if Key == 'MB1' and Input.UserInputType == Enum.UserInputType.MouseButton1
-                        or Key == 'MB2' and Input.UserInputType == Enum.UserInputType.MouseButton2 then
-                            KeyPicker.Toggled = not KeyPicker.Toggled;
-                            KeyPicker:DoClick();
-                        end;
+                        matched = (Key == 'MB1' and Input.UserInputType == Enum.UserInputType.MouseButton1)
+                               or (Key == 'MB2' and Input.UserInputType == Enum.UserInputType.MouseButton2);
                     elseif Input.UserInputType == Enum.UserInputType.Keyboard then
-                        if Input.KeyCode.Name == Key then
-                            KeyPicker.Toggled = not KeyPicker.Toggled;
-                            KeyPicker:DoClick();
-                        end;
+                        matched = (Input.KeyCode.Name == Key);
+                    end;
+
+                    if matched then
+                        KeyPicker.Toggled = not KeyPicker.Toggled;
+                        KeyPicker:DoClick();
+                    end;
+                elseif KeyPicker.Mode == 'Hold' then
+                    local matched = false;
+
+                    if Key == 'MB1' or Key == 'MB2' then
+                        matched = (Key == 'MB1' and Input.UserInputType == Enum.UserInputType.MouseButton1)
+                               or (Key == 'MB2' and Input.UserInputType == Enum.UserInputType.MouseButton2);
+                    elseif Input.UserInputType == Enum.UserInputType.Keyboard then
+                        matched = (Input.KeyCode.Name == Key);
+                    end;
+
+                    if matched and not KeyPicker.Toggled then
+                        KeyPicker.Toggled = true;
+                        if ParentObj.Type == 'Toggle' and KeyPicker.SyncToggleState then
+                            ParentObj:SetValue(true);
+                        end
+                        Library:SafeCallback(KeyPicker.Callback, true);
+                        Library:SafeCallback(KeyPicker.Clicked, true);
                     end;
                 end;
 
@@ -1328,6 +1336,26 @@ do
 
         Library:GiveSignal(InputService.InputEnded:Connect(function(Input)
             if (not Picking) then
+                if KeyPicker.Mode == 'Hold' and KeyPicker.Toggled then
+                    local Key = KeyPicker.Value;
+                    local released = false;
+
+                    if Key == 'MB1' or Key == 'MB2' then
+                        released = (Key == 'MB1' and Input.UserInputType == Enum.UserInputType.MouseButton1)
+                                or (Key == 'MB2' and Input.UserInputType == Enum.UserInputType.MouseButton2);
+                    elseif Input.UserInputType == Enum.UserInputType.Keyboard then
+                        released = (Input.KeyCode.Name == Key);
+                    end;
+
+                    if released then
+                        KeyPicker.Toggled = false;
+                        if ParentObj.Type == 'Toggle' and KeyPicker.SyncToggleState then
+                            ParentObj:SetValue(false);
+                        end
+                        Library:SafeCallback(KeyPicker.Callback, false);
+                    end;
+                end;
+
                 KeyPicker:Update();
             end;
         end));
@@ -1834,6 +1862,8 @@ do
             BackgroundColor3 = Color3.new(0, 0, 0);
             BorderColor3 = Color3.new(0, 0, 0);
             Size = UDim2.new(0, 13, 0, 13);
+            Position = UDim2.new(0, 0, 0.5, 0);
+            AnchorPoint = Vector2.new(0, 0.5);
             ZIndex = 5;
             Parent = Container;
         });
@@ -1857,28 +1887,22 @@ do
         });
 
         local ToggleLabel = Library:CreateLabel({
-            Size = UDim2.new(0, 216, 1, 0);
-            Position = UDim2.new(1, 6, 0, 0);
+            Size = UDim2.new(1, -20, 1, 0);
+            Position = UDim2.new(0, 20, 0, 0);
             TextSize = 12;
             Text = Info.Text;
             TextXAlignment = Enum.TextXAlignment.Left;
+            TextYAlignment = Enum.TextYAlignment.Center;
             ZIndex = 6;
-            Parent = ToggleInner;
-        });
-
-        Library:Create('UIListLayout', {
-            Padding = UDim.new(0, 4);
-            FillDirection = Enum.FillDirection.Horizontal;
-            HorizontalAlignment = Enum.HorizontalAlignment.Right;
-            SortOrder = Enum.SortOrder.LayoutOrder;
-            Parent = ToggleLabel;
+            Parent = Container;
         });
 
         local ToggleRegion = Library:Create('Frame', {
             BackgroundTransparency = 1;
-            Size = UDim2.new(0, 170, 1, 0);
+            Position = UDim2.new(0, 18, 0, 0);
+            Size = UDim2.new(1, -18, 1, 0);
             ZIndex = 8;
-            Parent = ToggleOuter;
+            Parent = Container;
         });
 
         Library:OnHighlight(ToggleRegion, ToggleOuter,
@@ -1965,7 +1989,6 @@ do
             Min = Info.Min;
             Max = Info.Max;
             Rounding = Info.Rounding;
-            MaxSize = 232;
             Type = 'Slider';
             Callback = Info.Callback or function(Value) end;
         };
@@ -2072,10 +2095,10 @@ do
                 DisplayLabel.Text = string.format('%s/%s', Slider.Value .. Suffix, Slider.Max .. Suffix);
             end;
 
-            local X = math.ceil(Library:MapValue(Slider.Value, Slider.Min, Slider.Max, 0, Slider.MaxSize));
-            Fill.Size = UDim2.new(0, X, 1, 0);
+            local Pct = (Slider.Value - Slider.Min) / (Slider.Max - Slider.Min);
+            Fill.Size = UDim2.new(Pct, 0, 1, 0);
 
-            HideBorderRight.Visible = not (X == Slider.MaxSize or X == 0);
+            HideBorderRight.Visible = not (Slider.Value >= Slider.Max or Slider.Value <= Slider.Min);
         end;
 
         function Slider:OnChanged(Func)
@@ -2092,7 +2115,7 @@ do
         end;
 
         function Slider:GetValueFromXOffset(X)
-            return Round(Library:MapValue(X, 0, Slider.MaxSize, Slider.Min, Slider.Max));
+            return Round(Library:MapValue(X, 0, 1, Slider.Min, Slider.Max));
         end;
 
         function Slider:SetValue(Str)
@@ -2113,18 +2136,16 @@ do
 
         SliderInner.InputBegan:Connect(function(Input)
             if Input.UserInputType == Enum.UserInputType.MouseButton1 and not Library:MouseIsOverOpenedFrame() then
-                local mPos = Mouse.X;
-                local gPos = Fill.Size.X.Offset;
-                local Diff = mPos - (Fill.AbsolutePosition.X + gPos);
-
                 while InputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) do
-                    local nMPos = Mouse.X;
-                    local nX = math.clamp(gPos + (nMPos - mPos) + Diff, 0, Slider.MaxSize);
+                    local sliderX = SliderInner.AbsolutePosition.X;
+                    local sliderW = SliderInner.AbsoluteSize.X;
 
-                    local nValue = Slider:GetValueFromXOffset(nX);
+                    local relX = math.clamp(Mouse.X - sliderX, 0, sliderW);
+                    local Pct = relX / sliderW;
+
+                    local nValue = Round(Slider.Min + Pct * (Slider.Max - Slider.Min));
                     local OldValue = Slider.Value;
                     Slider.Value = nValue;
-
                     Slider:Display();
 
                     if nValue ~= OldValue then

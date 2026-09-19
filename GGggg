@@ -38,8 +38,6 @@ pcall(function()
     CustomFontFace = Font.new(getcustomasset(FontName .. '.font'));
 end);
 
-local DefaultFontFace = Font.fromEnum(Enum.Font.Code);
-
 local ScreenGui = Instance.new('ScreenGui');
 ProtectGui(ScreenGui);
 
@@ -2987,24 +2985,15 @@ function Library:CreateWindow(...)
     });
 
     local WindowLabel = Library:CreateLabel({
-        Position = UDim2.new(0, 0, 0, 0);
-        Size = UDim2.new(1, 0, 0, 25);
+        Position = UDim2.new(0, 7, 0, 0);
+        Size = UDim2.new(0, 0, 0, 25);
         Text = Config.Title or '';
-        Font = Enum.Font.Code;
-        TextSize = 16;
-        TextColor3 = Library.AccentColor;
-        TextXAlignment = Enum.TextXAlignment.Center;
-        TextYAlignment = Enum.TextYAlignment.Center;
+        TextXAlignment = Enum.TextXAlignment.Left;
         ZIndex = 1;
         Parent = Inner;
     });
 
     WindowLabel:SetAttribute('NoCustomFont', true);
-    pcall(function() WindowLabel.FontFace = DefaultFontFace end);
-
-    Library:AddToRegistry(WindowLabel, {
-        TextColor3 = 'AccentColor';
-    });
 
     local MainSectionOuter = Library:Create('Frame', {
         BackgroundColor3 = Library.BackgroundColor;

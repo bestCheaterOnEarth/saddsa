@@ -180,7 +180,7 @@ function Library:CreateLabel(Properties, IsHud)
         BackgroundTransparency = 1;
         Font = Library.Font;
         TextColor3 = Library.FontColor;
-        TextSize = 13;
+        TextSize = 12;
         TextStrokeTransparency = 0;
     });
 
@@ -222,7 +222,7 @@ function Library:MakeDraggable(Instance, Cutoff)
 end;
 
 function Library:AddToolTip(InfoStr, HoverInstance)
-    local X, Y = Library:GetTextBounds(InfoStr, Library.Font, 14);
+    local X, Y = Library:GetTextBounds(InfoStr, Library.Font, 12);
     local Tooltip = Library:Create('Frame', {
         BackgroundColor3 = Library.MainColor;
         BorderColor3 = Library.OutlineColor;
@@ -1379,7 +1379,7 @@ do
         });
 
         if DoesWrap then
-            local Y = select(2, Library:GetTextBounds(Text, Library.Font, 14, Vector2.new(TextLabel.AbsoluteSize.X, math.huge)));
+            local Y = select(2, Library:GetTextBounds(Text, Library.Font, 12, Vector2.new(TextLabel.AbsoluteSize.X, math.huge)));
             TextLabel.Size = UDim2.new(1, -4, 0, Y);
         else
             Library:Create('UIListLayout', {
@@ -1398,7 +1398,7 @@ do
             TextLabel.Text = Text;
 
             if DoesWrap then
-                local Y = select(2, Library:GetTextBounds(Text, Library.Font, 14, Vector2.new(TextLabel.AbsoluteSize.X, math.huge)));
+                local Y = select(2, Library:GetTextBounds(Text, Library.Font, 12, Vector2.new(TextLabel.AbsoluteSize.X, math.huge)));
                 TextLabel.Size = UDim2.new(1, -4, 0, Y);
             end;
 
@@ -2831,7 +2831,7 @@ function Library:SetWatermarkVisibility(Bool)
 end;
 
 function Library:SetWatermark(Text)
-    local X, Y = Library:GetTextBounds(Text, Library.Font, 14);
+    local X, Y = Library:GetTextBounds(Text, Library.Font, 12);
     Library.Watermark.Size = UDim2.new(0, X + 15, 0, (Y * 1.5) + 3);
     Library:SetWatermarkVisibility(true);
 
@@ -2839,7 +2839,7 @@ function Library:SetWatermark(Text)
 end;
 
 function Library:Notify(Text, Time)
-    local XSize, YSize = Library:GetTextBounds(Text, Library.Font, 14);
+    local XSize, YSize = Library:GetTextBounds(Text, Library.Font, 12);
 
     YSize = YSize + 7;
 
@@ -2988,6 +2988,7 @@ function Library:CreateWindow(...)
         Position = UDim2.new(0, 0, 0, 0);
         Size = UDim2.new(1, 0, 0, 25);
         Text = Config.Title or '';
+        TextSize = 16;
         TextXAlignment = Enum.TextXAlignment.Center;
         TextYAlignment = Enum.TextYAlignment.Center;
         ZIndex = 1;
@@ -3070,7 +3071,7 @@ function Library:CreateWindow(...)
             Tabboxes = {};
         };
 
-        local TabButtonWidth = Library:GetTextBounds(Name, Library.Font, 16);
+        local TabButtonWidth = Library:GetTextBounds(Name, Library.Font, 12);
 
         local TabButton = Library:Create('Frame', {
             BackgroundColor3 = Library.BackgroundColor;
@@ -3089,6 +3090,7 @@ function Library:CreateWindow(...)
             Position = UDim2.new(0, 0, 0, 0);
             Size = UDim2.new(1, 0, 1, -1);
             Text = Name;
+            TextSize = 12;
             ZIndex = 1;
             Parent = TabButton;
         });

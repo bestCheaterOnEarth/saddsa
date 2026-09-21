@@ -1027,8 +1027,11 @@ do
             SyncToggleState = Info.SyncToggleState ~= false;
         };
 
+        -- Fix: só sobrescreve Modes se o usuário NÃO tiver passado um custom
         if KeyPicker.SyncToggleState then
-            Info.Modes = { 'Toggle', 'Hold' };
+            if not Info.Modes then
+                Info.Modes = { 'Toggle', 'Hold' };
+            end;
             Info.Mode = Info.Mode or 'Toggle';
             KeyPicker.Mode = Info.Mode;
         end;
@@ -1407,8 +1410,14 @@ do
         });
 
         if DoesWrap then
-            local Y = select(2, Library:GetTextBounds(Text, Library.Font, 12, Vector2.new(TextLabel.AbsoluteSize.X, math.huge)));
-            TextLabel.Size = UDim2.new(1, -4, 0, Y);
+            -- Fix: medir APÓS o render, não na criação
+            task.defer(function()
+                local Y = select(2, Library:GetTextBounds(Text, Library.Font, 12, Vector2.new(TextLabel.AbsoluteSize.X, math.huge)));
+                if Y and Y > 0 then
+                    TextLabel.Size = UDim2.new(1, -4, 0, Y);
+                    Groupbox:Resize();
+                end;
+            end);
         else
             Library:Create('UIListLayout', {
                 Padding = UDim.new(0, 4);
@@ -1438,7 +1447,8 @@ do
             setmetatable(Label, BaseAddons);
         end;
 
-        Groupbox:AddBlank(5);
+        -- Fix: espaçamento maior entre labels (era 5)
+        Groupbox:AddBlank(8);
         Groupbox:Resize();
 
         return Label;
@@ -1732,7 +1742,7 @@ do
             Parent = TextBoxInner;
         });
 
-        local Container = Library:Create('Frame', {
+        local InnerContainer = Library:Create('Frame', {
             BackgroundTransparency = 1;
             ClipsDescendants = true;
 
@@ -1760,7 +1770,7 @@ do
             TextXAlignment = Enum.TextXAlignment.Left;
 
             ZIndex = 7;
-            Parent = Container;
+            Parent = InnerContainer;
         });
 
         Library:ApplyTextStroke(Box);
@@ -1799,7 +1809,7 @@ do
 
         local function Update()
             local PADDING = 2;
-            local reveal = Container.AbsoluteSize.X;
+            local reveal = InnerContainer.AbsoluteSize.X;
 
             if not Box:IsFocused() or Box.TextBounds.X <= reveal - 2 * PADDING then
                 Box.Position = UDim2.new(0, PADDING, 0, 0);
@@ -1845,7 +1855,7 @@ do
     end;
 
     function Funcs:AddToggle(Idx, Info)
-        assert(Info.Text, 'AddInput: Missing `Text` string.');
+        assert(Info.Text, 'AddToggle: Missing `Text` string.');
 
         local Toggle = {
             Value = Info.Default or false;
@@ -1905,9 +1915,11 @@ do
             Parent = ToggleLabel;
         });
 
+        -- Fix: região clicável agora cobre a label inteira, não só 170px
         local ToggleRegion = Library:Create('Frame', {
             BackgroundTransparency = 1;
-            Size = UDim2.new(0, 170, 1, 0);
+            Position = UDim2.new(0, 13, 0, 0);
+            Size = UDim2.new(1, -13, 1, 0);
             ZIndex = 8;
             Parent = ToggleOuter;
         });
@@ -2204,8 +2216,6 @@ do
         local Groupbox = self;
         local Container = Groupbox.Container;
 
-        local RelativeOffset = 0;
-
         if not Info.Compact then
             local DropdownLabel = Library:CreateLabel({
                 Size = UDim2.new(1, 0, 0, 10);
@@ -2218,12 +2228,6 @@ do
             });
 
             Groupbox:AddBlank(3);
-        end;
-
-        for _, Element in next, Container:GetChildren() do
-            if not Element:IsA('UIListLayout') then
-                RelativeOffset = RelativeOffset + Element.Size.Y.Offset;
-            end;
         end;
 
         local DropdownOuter = Library:Create('Frame', {
@@ -3142,7 +3146,7 @@ function Library:CreateWindow(...)
             BackgroundTransparency = 1;
             BorderSizePixel = 0;
             Position = UDim2.new(0, 8 - 1, 0, 8 - 1);
-            Size = UDim2.new(0.5, -12 + 2, 0, 507 + 2);
+            Size = UDim2.new(0.5, -12 + 2, 1, -16);
             CanvasSize = UDim2.new(0, 0, 0, 0);
             BottomImage = '';
             TopImage = '';
@@ -3155,7 +3159,7 @@ function Library:CreateWindow(...)
             BackgroundTransparency = 1;
             BorderSizePixel = 0;
             Position = UDim2.new(0.5, 4 + 1, 0, 8 - 1);
-            Size = UDim2.new(0.5, -12 + 2, 0, 507 + 2);
+            Size = UDim2.new(0.5, -12 + 2, 1, -16);
             CanvasSize = UDim2.new(0, 0, 0, 0);
             BottomImage = '';
             TopImage = '';

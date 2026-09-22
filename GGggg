@@ -1418,7 +1418,7 @@ do
             end);
         else
             Library:Create('UIListLayout', {
-                Padding = UDim.new(0, 4);
+                Padding = UDim.new(0, 14);
                 FillDirection = Enum.FillDirection.Horizontal;
                 HorizontalAlignment = Enum.HorizontalAlignment.Right;
                 VerticalAlignment = Enum.VerticalAlignment.Center;
@@ -1445,7 +1445,7 @@ do
             setmetatable(Label, BaseAddons);
         end;
 
-        Groupbox:AddBlank(25);
+        Groupbox:AddBlank(5);
         Groupbox:Resize();
 
         return Label;
@@ -1904,7 +1904,7 @@ do
         });
 
         Library:Create('UIListLayout', {
-            Padding = UDim.new(0, 4);
+            Padding = UDim.new(0, 14);
             FillDirection = Enum.FillDirection.Horizontal;
             HorizontalAlignment = Enum.HorizontalAlignment.Right;
             VerticalAlignment = Enum.VerticalAlignment.Center;

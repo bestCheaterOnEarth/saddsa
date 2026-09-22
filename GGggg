@@ -1445,8 +1445,7 @@ do
             setmetatable(Label, BaseAddons);
         end;
 
-        -- >>> FIX ESPAÇAMENTO: era 5, agora 15 pra dar respiro entre labels empilhadas
-        Groupbox:AddBlank(15);
+        Groupbox:AddBlank(25);
         Groupbox:Resize();
 
         return Label;
@@ -1915,8 +1914,7 @@ do
 
         local ToggleRegion = Library:Create('Frame', {
             BackgroundTransparency = 1;
-            Position = UDim2.new(0, 13, 0, 0);
-            Size = UDim2.new(1, -13, 1, 0);
+            Size = UDim2.new(0, 250, 1, 0);
             ZIndex = 8;
             Parent = ToggleOuter;
         });

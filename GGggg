@@ -1027,7 +1027,6 @@ do
             SyncToggleState = Info.SyncToggleState ~= false;
         };
 
-        -- Fix: só sobrescreve Modes se o usuário NÃO tiver passado um custom
         if KeyPicker.SyncToggleState then
             if not Info.Modes then
                 Info.Modes = { 'Toggle', 'Hold' };
@@ -1410,7 +1409,6 @@ do
         });
 
         if DoesWrap then
-            -- Fix: medir APÓS o render, não na criação
             task.defer(function()
                 local Y = select(2, Library:GetTextBounds(Text, Library.Font, 12, Vector2.new(TextLabel.AbsoluteSize.X, math.huge)));
                 if Y and Y > 0 then
@@ -1447,8 +1445,8 @@ do
             setmetatable(Label, BaseAddons);
         end;
 
-        -- Fix: espaçamento maior entre labels (era 5)
-        Groupbox:AddBlank(8);
+        -- >>> FIX ESPAÇAMENTO: era 5, agora 15 pra dar respiro entre labels empilhadas
+        Groupbox:AddBlank(15);
         Groupbox:Resize();
 
         return Label;
@@ -1915,7 +1913,6 @@ do
             Parent = ToggleLabel;
         });
 
-        -- Fix: região clicável agora cobre a label inteira, não só 170px
         local ToggleRegion = Library:Create('Frame', {
             BackgroundTransparency = 1;
             Position = UDim2.new(0, 13, 0, 0);

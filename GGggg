@@ -1404,9 +1404,12 @@ do
             Text = Text;
             TextWrapped = DoesWrap or false;
             TextXAlignment = Enum.TextXAlignment.Left;
+            TextYAlignment = Enum.TextYAlignment.Top;
             ZIndex = 5;
             Parent = Container;
         });
+
+        local Layout;
 
         if DoesWrap then
             task.defer(function()
@@ -1417,14 +1420,30 @@ do
                 end;
             end);
         else
-            Library:Create('UIListLayout', {
-                Padding = UDim.new(0, 14);
-                FillDirection = Enum.FillDirection.Horizontal;
-                HorizontalAlignment = Enum.HorizontalAlignment.Right;
-                VerticalAlignment = Enum.VerticalAlignment.Center;
+            Library:Create('UIPadding', {
+                PaddingTop = UDim.new(0, 15),
+                Parent = TextLabel;
+            });
+
+            Layout = Library:Create('UIListLayout', {
+                Padding = UDim.new(0, 4);
+                FillDirection = Enum.FillDirection.Vertical;
+                HorizontalAlignment = Enum.HorizontalAlignment.Left;
+                VerticalAlignment = Enum.VerticalAlignment.Top;
                 SortOrder = Enum.SortOrder.LayoutOrder;
                 Parent = TextLabel;
             });
+
+            Layout:GetPropertyChangedSignal('AbsoluteContentSize'):Connect(function()
+                local sizeY = Layout.AbsoluteContentSize.Y;
+                if sizeY > 0 then
+                    local newSize = 15 + sizeY + 2;
+                    if TextLabel.Size.Y.Offset ~= newSize then
+                        TextLabel.Size = UDim2.new(1, -4, 0, newSize);
+                        Groupbox:Resize();
+                    end;
+                end;
+            end);
         end;
 
         Label.TextLabel = TextLabel;
@@ -1904,7 +1923,7 @@ do
         });
 
         Library:Create('UIListLayout', {
-            Padding = UDim.new(0, 14);
+            Padding = UDim.new(0, 4);
             FillDirection = Enum.FillDirection.Horizontal;
             HorizontalAlignment = Enum.HorizontalAlignment.Right;
             VerticalAlignment = Enum.VerticalAlignment.Center;

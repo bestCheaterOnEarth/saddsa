@@ -1027,6 +1027,7 @@ do
             SyncToggleState = Info.SyncToggleState ~= false;
         };
 
+        -- Fix: só sobrescreve Modes se o usuário NÃO tiver passado um custom
         if KeyPicker.SyncToggleState then
             if not Info.Modes then
                 Info.Modes = { 'Toggle', 'Hold' };
@@ -1404,14 +1405,12 @@ do
             Text = Text;
             TextWrapped = DoesWrap or false;
             TextXAlignment = Enum.TextXAlignment.Left;
-            TextYAlignment = Enum.TextYAlignment.Top;
             ZIndex = 5;
             Parent = Container;
         });
 
-        local Layout;
-
         if DoesWrap then
+            -- Fix: medir APÓS o render, não na criação
             task.defer(function()
                 local Y = select(2, Library:GetTextBounds(Text, Library.Font, 12, Vector2.new(TextLabel.AbsoluteSize.X, math.huge)));
                 if Y and Y > 0 then
@@ -1420,30 +1419,14 @@ do
                 end;
             end);
         else
-            Library:Create('UIPadding', {
-                PaddingTop = UDim.new(0, 15),
-                Parent = TextLabel;
-            });
-
-            Layout = Library:Create('UIListLayout', {
+            Library:Create('UIListLayout', {
                 Padding = UDim.new(0, 4);
-                FillDirection = Enum.FillDirection.Vertical;
-                HorizontalAlignment = Enum.HorizontalAlignment.Left;
-                VerticalAlignment = Enum.VerticalAlignment.Top;
+                FillDirection = Enum.FillDirection.Horizontal;
+                HorizontalAlignment = Enum.HorizontalAlignment.Right;
+                VerticalAlignment = Enum.VerticalAlignment.Center;
                 SortOrder = Enum.SortOrder.LayoutOrder;
                 Parent = TextLabel;
             });
-
-            Layout:GetPropertyChangedSignal('AbsoluteContentSize'):Connect(function()
-                local sizeY = Layout.AbsoluteContentSize.Y;
-                if sizeY > 0 then
-                    local newSize = 15 + sizeY + 2;
-                    if TextLabel.Size.Y.Offset ~= newSize then
-                        TextLabel.Size = UDim2.new(1, -4, 0, newSize);
-                        Groupbox:Resize();
-                    end;
-                end;
-            end);
         end;
 
         Label.TextLabel = TextLabel;
@@ -1464,7 +1447,8 @@ do
             setmetatable(Label, BaseAddons);
         end;
 
-        Groupbox:AddBlank(5);
+        -- Fix: espaçamento maior entre labels (era 5)
+        Groupbox:AddBlank(8);
         Groupbox:Resize();
 
         return Label;
@@ -1931,9 +1915,11 @@ do
             Parent = ToggleLabel;
         });
 
+        -- Fix: região clicável agora cobre a label inteira, não só 170px
         local ToggleRegion = Library:Create('Frame', {
             BackgroundTransparency = 1;
-            Size = UDim2.new(0, 250, 1, 0);
+            Position = UDim2.new(0, 13, 0, 0);
+            Size = UDim2.new(1, -13, 1, 0);
             ZIndex = 8;
             Parent = ToggleOuter;
         });
